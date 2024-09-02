@@ -1,13 +1,17 @@
 package gio.rest.webservices.restful_web_services.user.controller;
 
+import com.fasterxml.jackson.annotation.OptBoolean;
 import gio.rest.webservices.restful_web_services.user.User;
 import gio.rest.webservices.restful_web_services.user.dto.UserDto;
 import gio.rest.webservices.restful_web_services.user.service.UserService;
 import gio.rest.webservices.restful_web_services.utils.UtilService;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class UserController {
@@ -34,6 +38,16 @@ public class UserController {
                                    @RequestParam(required = false) String bornTo) {
         return this.userService.findUsers(name, bornFrom, bornTo)
                 .stream().map(user -> modelMapper.map(user, UserDto.class)).toList();
+    }
+
+    @GetMapping(value="/user/{id}")
+    @ResponseBody
+    public UserDto findUser(@PathVariable Long id) {
+        // TODO: implement error handling more efficiently
+        User user = this.userService.findUserById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        return modelMapper.map(user, UserDto.class);
     }
 
     @PatchMapping(value="/update-user/{id}")

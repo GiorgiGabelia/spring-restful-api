@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -27,7 +28,7 @@ public class UserService {
         LocalDate bornToLocal = bornTo != null ? utilService.isoToLocalDate(bornTo) : null;
 
         return userRepo.findAll().stream().filter(user -> {
-            boolean nameMatches = user.getName().contains(name);
+            boolean nameMatches = user.getName().toLowerCase().contains(name.toLowerCase());
             boolean dateMatches = true;
 
             if (bornFromLocal != null) {
@@ -40,6 +41,10 @@ public class UserService {
 
             return nameMatches && dateMatches;
         }).toList();
+    }
+
+    public Optional<User> findUserById(long id) {
+        return userRepo.findById(id);
     }
 
     public void deleteById(long id) {
