@@ -3,7 +3,7 @@ package gio.rest.webservices.restful_web_services;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-// Step 08
+// Step 11
 @SpringBootApplication
 public class RestfulWebServicesApplication {
 

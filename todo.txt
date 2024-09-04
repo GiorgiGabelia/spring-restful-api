@@ -1,2 +1,2 @@
-1. Universal error handling;
+1. Universal error handling, not found errors for update and delete endpoints;
 2. Return correct statuses;

@@ -1,17 +1,17 @@
 package gio.rest.webservices.restful_web_services.user.controller;
 
-import com.fasterxml.jackson.annotation.OptBoolean;
 import gio.rest.webservices.restful_web_services.user.User;
 import gio.rest.webservices.restful_web_services.user.dto.UserDto;
 import gio.rest.webservices.restful_web_services.user.service.UserService;
 import gio.rest.webservices.restful_web_services.utils.UtilService;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class UserController {
@@ -25,13 +25,13 @@ public class UserController {
         this.utilService = utilService;
     }
 
-    @PostMapping(value="/create-user")
-    public void createUser(@RequestBody UserDto userDto) {
-        User user = new User(userDto.getName(), utilService.isoToLocalDate(userDto.getBirthDate()));
-        this.userService.createUser(user);
+    @PostMapping(value = "/users")
+    public ResponseEntity<UserDto> createUser(@RequestBody UserDto userDto) {
+        User user = this.userService.createUser(new User(userDto.getName(), utilService.isoToLocalDate(userDto.getBirthDate())));
+        return ResponseEntity.created(getUriLocation(user.getId())).build();
     }
 
-    @GetMapping(value="/users")
+    @GetMapping(value = "/users")
     @ResponseBody
     public List<UserDto> findUsers(@RequestParam(required = false, defaultValue = "") String name,
                                    @RequestParam(required = false) String bornFrom,
@@ -40,23 +40,25 @@ public class UserController {
                 .stream().map(user -> modelMapper.map(user, UserDto.class)).toList();
     }
 
-    @GetMapping(value="/user/{id}")
+    @GetMapping(value = "/users/{id}")
     @ResponseBody
-    public UserDto findUser(@PathVariable Long id) {
-        // TODO: implement error handling more efficiently
-        User user = this.userService.findUserById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
-        return modelMapper.map(user, UserDto.class);
+    public ResponseEntity<UserDto> findUser(@PathVariable Long id) {
+        UserDto userDto = modelMapper.map(this.userService.findUserById(id), UserDto.class);
+        return ResponseEntity.ok(userDto);
     }
 
-    @PatchMapping(value="/update-user/{id}")
-    public void updateUser(@PathVariable long id, @RequestBody UserDto userDto) {
+    @PatchMapping(value = "/update-user/{id}")
+    public ResponseEntity<UserDto> updateUser(@PathVariable long id, @RequestBody UserDto userDto) {
         userService.updateById(id, userDto.getName(), utilService.isoToLocalDate(userDto.getBirthDate()));
+        return ResponseEntity.ok(null);
     }
 
-    @DeleteMapping(value="/delete-user/{id}")
+    @DeleteMapping(value = "/delete-user/{id}")
     public void deleteUser(@PathVariable long id) {
         userService.deleteById(id);
+    }
+
+    private URI getUriLocation(long id) {
+        return ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(id).toUri();
     }
 }

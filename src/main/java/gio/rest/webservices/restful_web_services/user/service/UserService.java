@@ -1,5 +1,6 @@
 package gio.rest.webservices.restful_web_services.user.service;
 
+import gio.rest.webservices.restful_web_services.exception.ResourceNotFoundException;
 import gio.rest.webservices.restful_web_services.user.User;
 import gio.rest.webservices.restful_web_services.user.repository.UserRepository;
 import gio.rest.webservices.restful_web_services.utils.UtilService;
@@ -19,8 +20,8 @@ public class UserService {
         this.utilService = utilService;
     }
 
-    public void createUser(User user) {
-        userRepo.save(user);
+    public User createUser(User user) {
+        return userRepo.save(user);
     }
 
     public List<User> findUsers(String name, String bornFrom, String bornTo) {
@@ -43,20 +44,21 @@ public class UserService {
         }).toList();
     }
 
-    public Optional<User> findUserById(long id) {
-        return userRepo.findById(id);
+    public User findUserById(long id) {
+        return userRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("User"));
     }
 
     public void deleteById(long id) {
+        if (!userRepo.existsById(id)) throw new ResourceNotFoundException("User");
         userRepo.deleteById(id);
     }
 
     public void updateById(long id, String newName, LocalDate newBirthDate) {
-        userRepo.findById(id).ifPresent(user -> {
-           if(newName != null) user.setName(newName);
-           if(newBirthDate != null) user.setBirthDate(newBirthDate);
+        User user = userRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("User"));
+        if (newName != null) user.setName(newName);
+        if (newBirthDate != null) user.setBirthDate(newBirthDate);
 
-           userRepo.save(user);
-        });
+        userRepo.save(user);
+
     }
 }
