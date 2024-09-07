@@ -3,7 +3,8 @@ package gio.rest.webservices.restful_web_services.user.controller;
 import gio.rest.webservices.restful_web_services.user.User;
 import gio.rest.webservices.restful_web_services.user.dto.UserDto;
 import gio.rest.webservices.restful_web_services.user.service.UserService;
-import gio.rest.webservices.restful_web_services.utils.UtilService;
+import gio.rest.webservices.restful_web_services.user.service.UtilService;
+import org.apache.coyote.Response;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,11 +34,12 @@ public class UserController {
 
     @GetMapping(value = "/users")
     @ResponseBody
-    public List<UserDto> findUsers(@RequestParam(required = false, defaultValue = "") String name,
-                                   @RequestParam(required = false) String bornFrom,
-                                   @RequestParam(required = false) String bornTo) {
-        return this.userService.findUsers(name, bornFrom, bornTo)
+    public ResponseEntity<List<UserDto>> findUsers(@RequestParam(required = false, defaultValue = "") String name,
+                                                   @RequestParam(required = false) String bornFrom,
+                                                   @RequestParam(required = false) String bornTo) {
+        List<UserDto> users = this.userService.findUsers(name, bornFrom, bornTo)
                 .stream().map(user -> modelMapper.map(user, UserDto.class)).toList();
+        return ResponseEntity.ok(users);
     }
 
     @GetMapping(value = "/users/{id}")
@@ -48,14 +50,15 @@ public class UserController {
     }
 
     @PatchMapping(value = "/update-user/{id}")
-    public ResponseEntity<UserDto> updateUser(@PathVariable long id, @RequestBody UserDto userDto) {
+    public ResponseEntity<Object> updateUser(@PathVariable long id, @RequestBody UserDto userDto) {
         userService.updateById(id, userDto.getName(), utilService.isoToLocalDate(userDto.getBirthDate()));
-        return ResponseEntity.ok(null);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping(value = "/delete-user/{id}")
-    public void deleteUser(@PathVariable long id) {
+    public ResponseEntity<Object> deleteUser(@PathVariable long id) {
         userService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     private URI getUriLocation(long id) {

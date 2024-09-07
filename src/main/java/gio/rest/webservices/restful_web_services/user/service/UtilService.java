@@ -1,4 +1,4 @@
-package gio.rest.webservices.restful_web_services.utils;
+package gio.rest.webservices.restful_web_services.user.service;
 
 import org.springframework.stereotype.Service;
 

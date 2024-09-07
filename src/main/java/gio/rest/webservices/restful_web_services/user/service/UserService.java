@@ -3,12 +3,10 @@ package gio.rest.webservices.restful_web_services.user.service;
 import gio.rest.webservices.restful_web_services.exception.ResourceNotFoundException;
 import gio.rest.webservices.restful_web_services.user.User;
 import gio.rest.webservices.restful_web_services.user.repository.UserRepository;
-import gio.rest.webservices.restful_web_services.utils.UtilService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService {

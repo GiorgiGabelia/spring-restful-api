@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 public class ErrorDetails {
     private final int statusCode;
     private final String message;
-
     private final LocalDateTime timestamp = LocalDateTime.now();
 
     public ErrorDetails(int statusCode, String message) {
