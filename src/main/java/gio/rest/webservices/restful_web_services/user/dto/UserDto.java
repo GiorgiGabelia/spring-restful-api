@@ -1,22 +1,28 @@
 package gio.rest.webservices.restful_web_services.user.dto;
 
+import jakarta.persistence.GeneratedValue;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
 
+import java.time.LocalDate;
+
 public class UserDto {
+    @GeneratedValue
     private long id;
 
-    @Size(min = 3, max = 50)
     @NotNull(message = "Name is necessary")
+    @Size(min = 3, max = 50)
     private String name;
 
     @NotNull(message = "Birthdate is necessary")
-    private String birthDate;
+    @Past
+    private LocalDate birthDate;
 
     public UserDto() {
     }
 
-    public UserDto(String name, String birthDate) {
+    public UserDto(String name, LocalDate birthDate) {
         this.name = name;
         this.birthDate = birthDate;
     }
@@ -29,7 +35,7 @@ public class UserDto {
         return id;
     }
 
-    public String getBirthDate() {
+    public LocalDate getBirthDate() {
         return birthDate;
     }
 
@@ -41,7 +47,7 @@ public class UserDto {
         this.name = name;
     }
 
-    public void setBirthDate(String birthDate) {
+    public void setBirthDate(LocalDate birthDate) {
         this.birthDate = birthDate;
     }
 }

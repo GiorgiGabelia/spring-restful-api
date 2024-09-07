@@ -3,41 +3,45 @@ package gio.rest.webservices.restful_web_services.user.controller;
 import gio.rest.webservices.restful_web_services.user.User;
 import gio.rest.webservices.restful_web_services.user.dto.UserDto;
 import gio.rest.webservices.restful_web_services.user.service.UserService;
-import gio.rest.webservices.restful_web_services.user.service.UtilService;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
 public class UserController {
     private final ModelMapper modelMapper;
     private final UserService userService;
-    private final UtilService utilService;
 
-    public UserController(ModelMapper modelMapper, UserService userService, UtilService utilService) {
+    public UserController(ModelMapper modelMapper, UserService userService) {
         this.modelMapper = modelMapper;
         this.userService = userService;
-        this.utilService = utilService;
     }
 
     @PostMapping(value = "/users")
     public ResponseEntity<Object> createUser(
             @RequestBody
             @Valid UserDto userDto) {
-        User user = this.userService.createUser(new User(userDto.getName(), utilService.isoToLocalDate(userDto.getBirthDate())));
+        User user = this.userService.createUser(new User(userDto.getName(), userDto.getBirthDate()));
         return ResponseEntity.created(getUriLocation(user.getId())).build();
     }
 
     @GetMapping(value = "/users")
     @ResponseBody
-    public ResponseEntity<List<UserDto>> findUsers(@RequestParam(required = false, defaultValue = "") String name,
-                                                   @RequestParam(required = false) String bornFrom,
-                                                   @RequestParam(required = false) String bornTo) {
+    public ResponseEntity<List<UserDto>> findUsers(@RequestParam(required = false, defaultValue = "")
+                                                   String name,
+                                                   @RequestParam(required = false)
+                                                   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                                                   LocalDate bornFrom,
+                                                   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                                                   @RequestParam(required = false)
+                                                   LocalDate bornTo) {
         List<UserDto> users = this.userService.findUsers(name, bornFrom, bornTo)
                 .stream().map(user -> modelMapper.map(user, UserDto.class)).toList();
         return ResponseEntity.ok(users);
@@ -52,7 +56,7 @@ public class UserController {
 
     @PatchMapping(value = "/update-user/{id}")
     public ResponseEntity<Object> updateUser(@PathVariable long id, @RequestBody UserDto userDto) {
-        User user = userService.updateById(id, userDto.getName(), utilService.isoToLocalDate(userDto.getBirthDate()));
+        User user = userService.updateById(id, userDto.getName(), userDto.getBirthDate());
         return ResponseEntity.noContent()
                 .location(getUriLocation(user.getId()))
                 .build();

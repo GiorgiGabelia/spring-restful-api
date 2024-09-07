@@ -1,7 +1,6 @@
 package gio.rest.webservices.restful_web_services.user.service;
 
 import gio.rest.webservices.restful_web_services.exception.ResourceNotFoundException;
-import gio.rest.webservices.restful_web_services.exception.RequestNotValidException;
 import gio.rest.webservices.restful_web_services.user.User;
 import gio.rest.webservices.restful_web_services.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -12,32 +11,22 @@ import java.util.List;
 @Service
 public class UserService {
     private final UserRepository userRepo;
-    private final UtilService utilService;
 
-    public UserService(UserRepository userRepo, UtilService utilService) {
+    public UserService(UserRepository userRepo) {
         this.userRepo = userRepo;
-        this.utilService = utilService;
     }
 
     public User createUser(User user) {
         return userRepo.save(user);
     }
 
-    public List<User> findUsers(String name, String bornFrom, String bornTo) {
-        LocalDate bornFromLocal = bornFrom != null ? utilService.isoToLocalDate(bornFrom) : null;
-        LocalDate bornToLocal = bornTo != null ? utilService.isoToLocalDate(bornTo) : null;
-
+    public List<User> findUsers(String name, LocalDate bornFrom, LocalDate bornTo) {
         return userRepo.findAll().stream().filter(user -> {
             boolean nameMatches = user.getName().toLowerCase().contains(name.toLowerCase());
             boolean dateMatches = true;
 
-            if (bornFromLocal != null) {
-                dateMatches = !user.getBirthDate().isBefore(bornFromLocal);
-            }
-
-            if (bornToLocal != null) {
-                dateMatches = dateMatches && !user.getBirthDate().isAfter(bornToLocal);
-            }
+            if (bornFrom != null) dateMatches = !user.getBirthDate().isBefore(bornFrom);
+            if (bornTo != null) dateMatches = dateMatches && !user.getBirthDate().isAfter(bornTo);
 
             return nameMatches && dateMatches;
         }).toList();
@@ -54,10 +43,8 @@ public class UserService {
 
     public User updateById(long id, String newName, LocalDate newBirthDate) {
         User user = userRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("User"));
-        if (newName != null) {
-            if (newName.length() >= 3) user.setName(newName);
-            else throw new RequestNotValidException("New Name is too short");
-        }
+
+        if (newName != null) user.setName(newName);
         if (newBirthDate != null) user.setBirthDate(newBirthDate);
 
         userRepo.save(user);
