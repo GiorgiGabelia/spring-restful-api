@@ -47,11 +47,21 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    @GetMapping(value = "/users/{id}")
+    @GetMapping(value = "/users/{id}", headers = "X-API-VERSION=1")
     @ResponseBody
     public ResponseEntity<UserDto> findUser(@PathVariable Long id) {
         UserDto userDto = modelMapper.map(this.userService.findUserById(id), UserDto.class);
         return ResponseEntity.ok(userDto);
+    }
+
+    @GetMapping(value = "/users/{id}", headers = "X-API-VERSION=2")
+    @ResponseBody
+    public ResponseEntity<Object> findUserV2(@PathVariable Long id) {
+        UserDto userDto = modelMapper.map(this.userService.findUserById(id), UserDto.class);
+        return ResponseEntity.ok(new Object() {
+            public final String name = userDto.getName();
+            public final LocalDate birthDate = userDto.getBirthDate();
+        });
     }
 
     @PatchMapping(value = "/update-user/{id}")
