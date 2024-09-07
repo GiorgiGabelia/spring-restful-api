@@ -3,6 +3,7 @@ package gio.rest.webservices.restful_web_services.user;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
@@ -12,10 +13,13 @@ public class User {
     @GeneratedValue
     private long id;
 
+    @Size(min = 3, max = 50)
     private String name;
+
     private LocalDate birthDate;
 
-    public User() {}
+    public User() {
+    }
 
     public User(String name, LocalDate birthDate) {
         this.name = name;

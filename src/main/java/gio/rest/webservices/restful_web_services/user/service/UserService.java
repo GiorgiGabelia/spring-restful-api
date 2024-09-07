@@ -1,6 +1,7 @@
 package gio.rest.webservices.restful_web_services.user.service;
 
 import gio.rest.webservices.restful_web_services.exception.ResourceNotFoundException;
+import gio.rest.webservices.restful_web_services.exception.RequestNotValidException;
 import gio.rest.webservices.restful_web_services.user.User;
 import gio.rest.webservices.restful_web_services.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -51,12 +52,15 @@ public class UserService {
         userRepo.deleteById(id);
     }
 
-    public void updateById(long id, String newName, LocalDate newBirthDate) {
+    public User updateById(long id, String newName, LocalDate newBirthDate) {
         User user = userRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("User"));
-        if (newName != null) user.setName(newName);
+        if (newName != null) {
+            if (newName.length() >= 3) user.setName(newName);
+            else throw new RequestNotValidException("New Name is too short");
+        }
         if (newBirthDate != null) user.setBirthDate(newBirthDate);
 
         userRepo.save(user);
-
+        return user;
     }
 }

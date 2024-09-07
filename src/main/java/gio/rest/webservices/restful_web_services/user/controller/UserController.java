@@ -4,9 +4,8 @@ import gio.rest.webservices.restful_web_services.user.User;
 import gio.rest.webservices.restful_web_services.user.dto.UserDto;
 import gio.rest.webservices.restful_web_services.user.service.UserService;
 import gio.rest.webservices.restful_web_services.user.service.UtilService;
-import org.apache.coyote.Response;
+import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -27,7 +26,9 @@ public class UserController {
     }
 
     @PostMapping(value = "/users")
-    public ResponseEntity<UserDto> createUser(@RequestBody UserDto userDto) {
+    public ResponseEntity<Object> createUser(
+            @RequestBody
+            @Valid UserDto userDto) {
         User user = this.userService.createUser(new User(userDto.getName(), utilService.isoToLocalDate(userDto.getBirthDate())));
         return ResponseEntity.created(getUriLocation(user.getId())).build();
     }
@@ -51,8 +52,10 @@ public class UserController {
 
     @PatchMapping(value = "/update-user/{id}")
     public ResponseEntity<Object> updateUser(@PathVariable long id, @RequestBody UserDto userDto) {
-        userService.updateById(id, userDto.getName(), utilService.isoToLocalDate(userDto.getBirthDate()));
-        return ResponseEntity.noContent().build();
+        User user = userService.updateById(id, userDto.getName(), utilService.isoToLocalDate(userDto.getBirthDate()));
+        return ResponseEntity.noContent()
+                .location(getUriLocation(user.getId()))
+                .build();
     }
 
     @DeleteMapping(value = "/delete-user/{id}")
