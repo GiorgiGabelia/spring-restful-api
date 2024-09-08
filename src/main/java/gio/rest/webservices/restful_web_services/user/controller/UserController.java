@@ -1,6 +1,8 @@
 package gio.rest.webservices.restful_web_services.user.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import gio.rest.webservices.restful_web_services.user.User;
+import gio.rest.webservices.restful_web_services.user.Views;
 import gio.rest.webservices.restful_web_services.user.dto.UserDto;
 import gio.rest.webservices.restful_web_services.user.service.UserService;
 import jakarta.validation.Valid;
@@ -25,6 +27,7 @@ public class UserController {
     }
 
     @PostMapping(value = "/users")
+    @JsonView(Views.Public.class)
     public ResponseEntity<Object> createUser(
             @RequestBody
             @Valid UserDto userDto) {
@@ -65,6 +68,7 @@ public class UserController {
     }
 
     @PatchMapping(value = "/update-user/{id}")
+    @JsonView(Views.Public.class)
     public ResponseEntity<Object> updateUser(@PathVariable long id, @RequestBody UserDto userDto) {
         User user = userService.updateById(id, userDto.getName(), userDto.getBirthDate());
         return ResponseEntity.noContent()
